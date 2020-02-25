@@ -136,3 +136,30 @@ PROTON_USE_WINED3D=1  MESA_SHADER_READ_PATH='mesa/read' %command%
 # References
 1. <https://eleni.mutantstargoat.com/hikiko/2017/08/03/mesa-replacement-shaders/>
 2. <https://github.com/ValveSoftware/Proton>
+
+----
+
+# Update 25/02/2020
+Thanks to CME and [Joshua-Ashton](https://gitlab.freedesktop.org/JoshuaAshton), the issue was narrowed down to
+radv code in Mesa for the DXVK case (https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/3951) and radeonsi for the WineD3D case (https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/3953).
+CME's paste url/patch:
+```
+diff --git a/src/amd/vulkan/radv_device.c b/src/amd/vulkan/radv_device.c
+index e38fd9bc62b..fbaad8730a0 100644
+--- a/src/amd/vulkan/radv_device.c
++++ b/src/amd/vulkan/radv_device.c
+@@ -6921,7 +6921,7 @@ radv_init_sampler(struct radv_device *device,
+                             S_008F30_ANISO_BIAS(max_aniso_ratio) |
+                             S_008F30_DISABLE_CUBE_WRAP(0) |
+                             S_008F30_COMPAT_MODE(compat_mode) |
+-                            S_008F30_FILTER_MODE(filter_mode));
++                            S_008F30_FILTER_MODE(filter_mode) | S_008F30_TRUNC_COORD(1));
+        sampler->state[1] = (S_008F34_MIN_LOD(S_FIXED(CLAMP(pCreateInfo->minLod, 0, 15), 8)) |
+                             S_008F34_MAX_LOD(S_FIXED(CLAMP(pCreateInfo->maxLod, 0, 15), 8)) |
+                             S_008F34_PERF_MIP(max_aniso_ratio ? max_aniso_ratio + 6 : 0));
+```
+## Exchange
+![](pic/disc/u1.png)
+![](pic/disc/u2.png)
+![](pic/disc/u3.png)
+![](pic/disc/u4.png)
